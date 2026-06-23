@@ -36,3 +36,46 @@
 .btn-danger {
   background: #dc3545;
 }
+
+.search-container {
+  margin: 20px 0;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 15px;
+  font-size: 14px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+  .search-input:focus {
+    border-color: #007bff;
+  }
+
+.no-results {
+  color: #666;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+/* Make headers look clickable */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+  .sortable:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Style the sort arrows */
+  .sortable span {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #007bff;
+  }

@@ -36,11 +36,26 @@ export class EmployeeFormComponent implements OnInit {
     }
   }
 
+  //onSubmit() {
+  //  if (this.isEditMode) {
+  //    this.employeeService.updateEmployee(this.employee.id, this.employee).subscribe(() => this.router.navigate(['/']));
+  //  } else {
+  //    this.employeeService.addEmployee(this.employee).subscribe(() => this.router.navigate(['/']));
+  //  }
+  //}
+
   onSubmit() {
     if (this.isEditMode) {
-      this.employeeService.updateEmployee(this.employee.id, this.employee).subscribe(() => this.router.navigate(['/']));
+      this.employeeService.updateEmployee(this.employee.id, this.employee).subscribe(
+        () => this.router.navigate(['/']),
+        error => console.error('Error updating employee:', error)
+      );
     } else {
-      this.employeeService.addEmployee(this.employee).subscribe(() => this.router.navigate(['/']));
+      this.employeeService.addEmployee(this.employee).subscribe(
+        () => this.router.navigate(['/']),
+        error => console.error('Error adding employee:', error)
+      );
     }
   }
+
 }

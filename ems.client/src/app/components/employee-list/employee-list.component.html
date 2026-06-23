@@ -2,18 +2,46 @@
   <h2>Employee List</h2>
   <a routerLink="/add" class="btn btn-primary">Add New Employee</a>
 
+  <!-- NEW: Search Box -->
+  <div class="search-container">
+    <input type="text"
+           [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+           placeholder="Search by name, email, or department..."
+           class="search-input">
+  </div>
+
+  <!-- UPDATED: Show message if no results -->
+  <p *ngIf="filteredEmployees.length === 0 && searchTerm" class="no-results">
+    No employees found matching "{{ searchTerm }}"
+  </p>
+
   <table class="table" *ngIf="employees.length > 0">
     <thead>
       <tr>
         <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Department</th>
+        <th class="sortable" (click)="sortBy('firstName')">
+          Name
+          <span *ngIf="sortColumn === 'firstName'">
+            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+          </span>
+        </th>
+        <th class="sortable" (click)="sortBy('email')">
+          Email
+          <span *ngIf="sortColumn === 'email'">
+            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+          </span>
+        </th>
+        <th class="sortable" (click)="sortBy('department')">
+          Department
+          <span *ngIf="sortColumn === 'department'">
+            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+          </span>
+        </th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let emp of employees">
+      <tr *ngFor="let emp of filteredEmployees">
         <td>{{ emp.id }}</td>
         <td>{{ emp.firstName }} {{ emp.lastName }}</td>
         <td>{{ emp.email }}</td>

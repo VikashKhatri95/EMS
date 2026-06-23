@@ -13,11 +13,40 @@
     font-weight: bold;
   }
 
-  .form-group input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
+.form-control {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+  .form-control:focus {
+    outline: none;
+    border-color: #007bff;
   }
+
+/* Red border for invalid fields */
+.is-invalid {
+  border-color: #dc3545 !important;
+}
+
+/* Error message styling */
+.error-message {
+  color: #dc3545;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+  .error-message small {
+    display: block;
+  }
+
+/* Button styling */
+.button-group {
+  margin-top: 20px;
+}
 
 .btn {
   padding: 10px 15px;
@@ -26,11 +55,17 @@
   cursor: pointer;
   border-radius: 4px;
   margin-right: 10px;
+  font-size: 14px;
 }
 
 .btn-success {
   background: #28a745;
 }
+
+  .btn-success:disabled {
+    background: #999;
+    cursor: not-allowed;
+  }
 
 .btn-secondary {
   background: #6c757d;

@@ -31,6 +31,7 @@ namespace EMS.Server.Controllers
         // GET: api/employees
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        
         {
             return await _context.Employees.ToListAsync();
         }
