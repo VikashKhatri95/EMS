@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Employee } from '../models/employee.model';
+import { Employee, PagedResult } from '../models/employee.model';
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
@@ -10,9 +10,33 @@ export class EmployeeService {
 
   constructor(private http: HttpClient) { }
 
-  getEmployees(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(this.apiUrl);
+  //getEmployees(): Observable<Employee[]> {
+  //  return this.http.get<Employee[]>(this.apiUrl);
+  //}
+
+  // UPDATED: Now accepts pagination parameters
+  getEmployees(
+    page: number = 1,
+    pageSize: number = 10,
+    searchTerm: string = '',
+    sortBy: string = '',
+    sortDirection: string = 'asc'
+  ): Observable<PagedResult<Employee>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+
+    if (sortBy) {
+      params = params.set('sortBy', sortBy).set('sortDirection', sortDirection);
+    }
+
+    return this.http.get<PagedResult<Employee>>(this.apiUrl, { params });
   }
+
 
   getEmployee(id: number): Observable<Employee> {
     return this.http.get<Employee>(`${this.apiUrl}/${id}`);

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EMS.Server.Data;
 using EMS.Server.Models;
+using EMS.API.Models;
 
 namespace EMS.Server.Controllers
 {
@@ -28,12 +29,69 @@ namespace EMS.Server.Controllers
             _context = context;
         }
 
-        // GET: api/employees
+        // GET: api/employees?page=1&pageSize=10&searchTerm=john&sortBy=firstName&sortDirection=asc
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
-        
+        public async Task<ActionResult<PagedResult<Employee>>> GetEmployees(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string sortDirection = "asc")
         {
-            return await _context.Employees.ToListAsync();
+            var query = _context.Employees.AsQueryable();
+
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.ToLower();
+                query = query.Where(e =>
+                    e.FirstName.ToLower().Contains(term) ||
+                    e.LastName.ToLower().Contains(term) ||
+                    e.Email.ToLower().Contains(term) ||
+                    e.Department.ToLower().Contains(term));
+            }
+
+            // Apply sorting
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                query = sortBy.ToLower() switch
+                {
+                    "firstname" => sortDirection == "asc"
+                        ? query.OrderBy(e => e.FirstName)
+                        : query.OrderByDescending(e => e.FirstName),
+                    "email" => sortDirection == "asc"
+                        ? query.OrderBy(e => e.Email)
+                        : query.OrderByDescending(e => e.Email),
+                    "department" => sortDirection == "asc"
+                        ? query.OrderBy(e => e.Department)
+                        : query.OrderByDescending(e => e.Department),
+                    _ => query.OrderBy(e => e.Id)
+                };
+            }
+            else
+            {
+                query = query.OrderBy(e => e.Id);
+            }
+
+            // Get total count before pagination
+            var totalRecords = await query.CountAsync();
+
+            // Apply pagination
+            var employees = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Create the paged result
+            var result = new PagedResult<Employee>
+            {
+                Data = employees,
+                TotalRecords = totalRecords,
+                CurrentPage = page,
+                PageSize = pageSize
+            };
+
+            return result;
         }
 
         // GET: api/employees/5

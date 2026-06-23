@@ -11,9 +11,16 @@ export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
   searchTerm: string = '';
   filteredEmployees: Employee[] = [];
+
   // NEW: Sorting properties
   sortColumn: string = ''; // Which column is being sorted
   sortDirection: 'asc' | 'desc' = 'asc'; // Sort direction
+
+  // NEW: Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalRecords: number = 0;
+  totalPages: number = 0;
 
   constructor(private employeeService: EmployeeService) { }
 
@@ -21,96 +28,111 @@ export class EmployeeListComponent implements OnInit {
     this.loadEmployees();
   }
 
+  //loadEmployees() {
+  //  this.employeeService.getEmployees().subscribe(data => {
+  //    this.employees = data;
+  //    this.filteredEmployees = data;
+  //  });
+  //}
+
   loadEmployees() {
-    this.employeeService.getEmployees().subscribe(data => {
-      this.employees = data;
-      this.filteredEmployees = data;
+    this.employeeService.getEmployees(
+      this.currentPage,
+      this.pageSize,
+      this.searchTerm,
+      this.sortColumn,
+      this.sortDirection
+    ).subscribe(result => {
+      this.employees = result.data;
+      this.filteredEmployees = result.data;
+      this.totalRecords = result.totalRecords;
+      this.totalPages = result.totalPages;
     });
   }
 
+
   deleteEmployee(id: number) {
     if (confirm('Are you sure?')) {
-      this.employeeService.deleteEmployee(id).subscribe(() => this.loadEmployees());
-    }
-  }
-
-  onSearch() {
-    if (!this.searchTerm.trim()) {
-      this.filteredEmployees = this.employees;
-    } else {
-      const term = this.searchTerm.toLowerCase();
-      this.filteredEmployees = this.employees.filter(emp =>
-        emp.firstName.toLowerCase().includes(term) ||
-        emp.lastName.toLowerCase().includes(term) ||
-        emp.email.toLowerCase().includes(term) ||
-        emp.department.toLowerCase().includes(term)
-      );
-    }
-
-    // If a sort is active, reapply it after filtering
-    if (this.sortColumn) {
-      this.filteredEmployees.sort((a, b) => {
-        let valueA = '';
-        let valueB = '';
-
-        if (this.sortColumn === 'firstName') {
-          valueA = a.firstName.toLowerCase();
-          valueB = b.firstName.toLowerCase();
-        } else if (this.sortColumn === 'email') {
-          valueA = a.email.toLowerCase();
-          valueB = b.email.toLowerCase();
-        } else if (this.sortColumn === 'department') {
-          valueA = a.department.toLowerCase();
-          valueB = b.department.toLowerCase();
+      this.employeeService.deleteEmployee(id).subscribe(() => {
+        // If we delete the last item on the page, go to previous page
+        if (this.employees.length === 1 && this.currentPage > 1) {
+          this.currentPage--;
         }
-
-        if (valueA < valueB) {
-          return this.sortDirection === 'asc' ? -1 : 1;
-        }
-        if (valueA > valueB) {
-          return this.sortDirection === 'asc' ? 1 : -1;
-        }
-        return 0;
+        this.loadEmployees();
       });
     }
   }
 
+  onSearch() {
+    this.currentPage = 1; // Reset to first page when searching
+    this.loadEmployees(); // Reload from backend with new search term
+  }
+
   // NEW: This runs when a column header is clicked
   sortBy(column: string) {
-    // If clicking the same column, toggle direction
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
-      // If clicking a different column, start with ascending
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
 
-    // Apply sorting to the filtered employees
-    this.filteredEmployees.sort((a, b) => {
-      let valueA = '';
-      let valueB = '';
-
-      // Get the values based on which column we're sorting
-      if (column === 'firstName') {
-        valueA = a.firstName.toLowerCase();
-        valueB = b.firstName.toLowerCase();
-      } else if (column === 'email') {
-        valueA = a.email.toLowerCase();
-        valueB = b.email.toLowerCase();
-      } else if (column === 'department') {
-        valueA = a.department.toLowerCase();
-        valueB = b.department.toLowerCase();
-      }
-
-      // Compare and return based on direction
-      if (valueA < valueB) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (valueA > valueB) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
+    this.loadEmployees(); // Reload from backend with new sort
   }
+
+  // NEW: Reset the sort to original order
+  resetSort() {
+    this.sortColumn = '';
+    this.sortDirection = 'asc';
+    this.loadEmployees(); // Reload from backend without sort
+  }
+
+  // NEW: Go to a specific page
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadEmployees();
+    }
+  }
+
+  // NEW: Go to previous page
+  goToPreviousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadEmployees();
+    }
+  }
+
+  // NEW: Go to next page
+  goToNextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadEmployees();
+    }
+  }
+
+  // NEW: Get array of page numbers for display
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5; // Show max 5 page numbers at a time
+
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  // NEW: Helper method for template
+  getEndRecord(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalRecords);
+  }
+
 }

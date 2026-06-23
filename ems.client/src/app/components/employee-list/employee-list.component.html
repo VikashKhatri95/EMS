@@ -2,6 +2,13 @@
   <h2>Employee List</h2>
   <a routerLink="/add" class="btn btn-primary">Add New Employee</a>
 
+  <!-- NEW: Reset Sort Button (only shows when sorting is active) -->
+  <button *ngIf="sortColumn"
+          (click)="resetSort()"
+          class="btn btn-outline-secondary btn-sm">
+    ✕ Clear Sort
+  </button>
+
   <!-- NEW: Search Box -->
   <div class="search-container">
     <input type="text"
@@ -9,6 +16,14 @@
            placeholder="Search by name, email, or department..."
            class="search-input">
   </div>
+
+  <!-- NEW: Pagination Info -->
+  <div class="pagination-info" *ngIf="totalRecords > 0">
+    Showing {{ (currentPage - 1) * pageSize + 1 }} to
+    {{ getEndRecord() }} of
+    {{ totalRecords }} employees
+  </div>
+
 
   <!-- UPDATED: Show message if no results -->
   <p *ngIf="filteredEmployees.length === 0 && searchTerm" class="no-results">
@@ -53,4 +68,27 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- NEW: Pagination Controls -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button (click)="goToPreviousPage()"
+            [disabled]="currentPage === 1"
+            class="btn btn-sm btn-outline-primary">
+      ← Previous
+    </button>
+
+    <button *ngFor="let page of getPageNumbers()"
+            (click)="goToPage(page)"
+            [class.active]="page === currentPage"
+            class="btn btn-sm btn-outline-primary">
+      {{ page }}
+    </button>
+
+    <button (click)="goToNextPage()"
+            [disabled]="currentPage === totalPages"
+            class="btn btn-sm btn-outline-primary">
+      Next →
+    </button>
+  </div>
+
 </div>
