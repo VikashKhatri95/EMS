@@ -57,3 +57,4 @@ TestResult.xml
 nunit-*.xml
 /.vs/EMS
 /ems.client/.vscode
+/.vs/ProjectEvaluation

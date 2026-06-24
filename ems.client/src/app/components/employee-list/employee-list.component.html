@@ -26,11 +26,19 @@
 
 
   <!-- UPDATED: Show message if no results -->
-  <p *ngIf="filteredEmployees.length === 0 && searchTerm" class="no-results">
+  <!--<p *ngIf="filteredEmployees.length === 0 && searchTerm" class="no-results">
     No employees found matching "{{ searchTerm }}"
   </p>
 
-  <table class="table" *ngIf="employees.length > 0">
+  <table class="table" *ngIf="employees.length > 0">-->
+  <!-- NEW: Show spinner while loading -->
+  <app-spinner [isLoading]="isLoading"></app-spinner>
+
+  <p *ngIf="filteredEmployees.length === 0 && searchTerm && !isLoading" class="no-results">
+    No employees found matching "{{ searchTerm }}"
+  </p>
+
+  <table class="table" *ngIf="filteredEmployees.length > 0 && !isLoading">
     <thead>
       <tr>
         <th>ID</th>

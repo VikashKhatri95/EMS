@@ -22,6 +22,9 @@ export class EmployeeListComponent implements OnInit {
   totalRecords: number = 0;
   totalPages: number = 0;
 
+  // NEW: Loading state
+  isLoading: boolean = false;
+
   constructor(private employeeService: EmployeeService) { }
 
   ngOnInit(): void {
@@ -36,29 +39,44 @@ export class EmployeeListComponent implements OnInit {
   //}
 
   loadEmployees() {
+    this.isLoading = true; // Show spinner
     this.employeeService.getEmployees(
       this.currentPage,
       this.pageSize,
       this.searchTerm,
       this.sortColumn,
       this.sortDirection
-    ).subscribe(result => {
-      this.employees = result.data;
-      this.filteredEmployees = result.data;
-      this.totalRecords = result.totalRecords;
-      this.totalPages = result.totalPages;
+    ).subscribe({
+      next: (result) => {
+        this.employees = result.data;
+        this.filteredEmployees = result.data;
+        this.totalRecords = result.totalRecords;
+        this.totalPages = result.totalPages;
+        this.isLoading = false; // Hide spinner on success
+      },
+      error: (error) => {
+        console.error('Error loading employees:', error);
+        this.isLoading = false; // Hide spinner even on error
+      }
     });
   }
 
 
   deleteEmployee(id: number) {
     if (confirm('Are you sure?')) {
-      this.employeeService.deleteEmployee(id).subscribe(() => {
-        // If we delete the last item on the page, go to previous page
-        if (this.employees.length === 1 && this.currentPage > 1) {
-          this.currentPage--;
+      this.isLoading = true; // NEW: Show spinner while deleting;
+      this.employeeService.deleteEmployee(id).subscribe({
+        next: () => {
+          // If we delete the last item on the page, go to previous page
+          if (this.employees.length === 1 && this.currentPage > 1) {
+            this.currentPage--;
+          }
+          this.loadEmployees();
+        },
+        error: (error) => {
+          console.error('Error deleting employee:', error);
+          this.isLoading = false;
         }
-        this.loadEmployees();
       });
     }
   }
