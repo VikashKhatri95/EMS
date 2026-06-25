@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';// ← Added ViewChild
 import { EmployeeService } from '../../services/employee.service';
 import { Employee } from '../../models/employee.model';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+
 
 @Component({
   selector: 'app-employee-list',
@@ -24,6 +26,9 @@ export class EmployeeListComponent implements OnInit {
 
   // NEW: Loading state
   isLoading: boolean = false;
+
+  // Inside the class, add:
+  @ViewChild(ConfirmModalComponent) deleteModal!: ConfirmModalComponent;
 
   constructor(private employeeService: EmployeeService) { }
 
@@ -62,23 +67,53 @@ export class EmployeeListComponent implements OnInit {
   }
 
 
-  deleteEmployee(id: number) {
-    if (confirm('Are you sure?')) {
-      this.isLoading = true; // NEW: Show spinner while deleting;
-      this.employeeService.deleteEmployee(id).subscribe({
-        next: () => {
-          // If we delete the last item on the page, go to previous page
-          if (this.employees.length === 1 && this.currentPage > 1) {
-            this.currentPage--;
-          }
-          this.loadEmployees();
-        },
-        error: (error) => {
-          console.error('Error deleting employee:', error);
-          this.isLoading = false;
+  //deleteEmployee(id: number) {
+  //  if (confirm('Are you sure?')) {
+  //    this.isLoading = true; // NEW: Show spinner while deleting;
+  //    this.employeeService.deleteEmployee(id).subscribe({
+  //      next: () => {
+  //        // If we delete the last item on the page, go to previous page
+  //        if (this.employees.length === 1 && this.currentPage > 1) {
+  //          this.currentPage--;
+  //        }
+  //        this.loadEmployees();
+  //      },
+  //      error: (error) => {
+  //        console.error('Error deleting employee:', error);
+  //        this.isLoading = false;
+  //      }
+  //    });
+  //  }
+  //}
+
+  // Opens the modal with the selected employee
+  openDeleteModal(employee: Employee) {
+    this.deleteModal.show(employee);
+  }
+
+  // Called when user clicks "Delete" in the modal
+  onConfirmDelete(employee: Employee) {
+    this.isLoading = true;
+
+    this.employeeService.deleteEmployee(employee.id).subscribe({
+      next: () => {
+        // If we delete the last item on the page, go to previous page
+        if (this.employees.length === 1 && this.currentPage > 1) {
+          this.currentPage--;
         }
-      });
-    }
+        this.loadEmployees();
+      },
+      error: (error) => {
+        console.error('Error deleting employee:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Called when user clicks "Cancel" in the modal
+  onCancelDelete() {
+    // Nothing to do - modal already closed itself
+    console.log('Delete cancelled');
   }
 
   onSearch() {

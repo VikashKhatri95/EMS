@@ -71,7 +71,7 @@
         <td>{{ emp.department }}</td>
         <td>
           <a [routerLink]="['/edit', emp.id]" class="btn btn-sm btn-warning">Edit</a>
-          <button (click)="deleteEmployee(emp.id)" class="btn btn-sm btn-danger">Delete</button>
+          <button (click)="openDeleteModal(emp)" class="btn btn-sm btn-danger">Delete</button>
         </td>
       </tr>
     </tbody>
@@ -98,5 +98,10 @@
       Next →
     </button>
   </div>
+
+  <!-- NEW: Add the modal at the bottom -->
+  <app-confirm-modal (confirmed)="onConfirmDelete($event)"
+                     (cancelled)="onCancelDelete()">
+  </app-confirm-modal>
 
 </div>

@@ -1,0 +1,19 @@
+<!-- Backdrop (dark overlay) -->
+<div class="modal-backdrop" *ngIf="isVisible" (click)="onCancel()"></div>
+
+<!-- Modal Dialog -->
+<div class="modal-dialog" *ngIf="isVisible">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Confirm Delete</h3>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete <strong>{{ employeeName }}</strong>?</p>
+      <p class="warning-text">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" (click)="onCancel()">Cancel</button>
+      <button class="btn btn-delete" (click)="onConfirm()">Delete</button>
+    </div>
+  </div>
+</div>
